@@ -1,10 +1,5 @@
 # Emergency Communication and Alert System (ECAS)
 
-**Course:** Computer Networks Lab (`24B15CS313`) — Jaypee Institute of Information Technology (JIIT), Noida  
-**Submitted To:** Dr. Mukta Goyal  
-**Submitted By:** Udit Kumar Singh (`992401030002`), Tanmay Sharma (`992401030005`), Ayan Juneja (`992401030018`), Sudarshan Jha (`992401030025`)
-
----
 
 ## 1. Setup & Quick Start
 
