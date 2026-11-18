@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ECAS — Emergency Communication &amp; Alert System</title>
+  <link rel="stylesheet" href="/css/styles.css?v=7" />
+</head>
+<body>
+  <!-- Login View -->
+  <section id="login-view" class="login-shell">
+    <div class="login-card">
+      <div class="login-top-row">
+        <div class="brand-badge">JIIT NOIDA • CN LAB 24B15CS313</div>
+        <button id="theme-toggle-login" class="btn btn-ghost btn-sm" type="button">Light Mode</button>
+      </div>
+      <h1>Emergency Communication &amp; Alert System</h1>
+      <p class="subtitle">Authenticated Socket &amp; Network Telemetry Console</p>
+
+      <div class="auth-switch">
+        <button id="show-login-btn" type="button" class="btn btn-primary btn-sm">Sign In</button>
+        <button id="show-register-btn" type="button" class="btn btn-ghost btn-sm">Register (Citizen)</button>
+      </div>
+
+      <form id="login-form" class="form-stack mt-12">
+        <label>
+          <span>Username</span>
+          <input id="login-username" type="text" required autocomplete="username" placeholder="admin / police / fire / ambulance / hospital / citizen" />
+        </label>
+        <label>
+          <span>Password</span>
+          <input id="login-password" type="password" required autocomplete="current-password" placeholder="Enter password" />
+        </label>
+        <div id="login-error" class="error-banner hidden"></div>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </form>
+
+      <form id="register-form" class="form-stack mt-12 hidden">
+        <label>
+          <span>Citizen Username (3-30 chars, alphanumeric/underscore)</span>
+          <input id="reg-username" type="text" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_]{3,30}" placeholder="e.g. citizen_rahul" />
+        </label>
+        <label>
+          <span>Password (min 8 chars)</span>
+          <input id="reg-password" type="password" required minlength="8" maxlength="128" placeholder="At least 8 characters" />
+        </label>
+        <div class="muted">Self-registration creates a <strong>citizen</strong> SOS account only.</div>
+        <div id="reg-msg" class="info-banner hidden"></div>
+        <button type="submit" class="btn btn-primary">Create Citizen Account</button>
+      </form>
+
+      <div class="account-hints">
+        <strong>Role Accounts:</strong>
+        <span>admin / admin123</span> •
+        <span>police / police123</span> •
+        <span>ambulance / ambulance123</span> •
+        <span>fire / fire123</span> •
+        <span>hospital / hospital123</span> •
+        <span>citizen / citizen123</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Authenticated App -->
+  <div id="app-view" class="app-shell hidden">
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="logo-dot"></span>
+        <div>
+          <div class="topbar-title">ECAS Control &amp; Telemetry</div>
+          <div class="topbar-sub">TCP:9001 • UDP:9002 • TLS:9003 • Emulated Link Layer</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span id="ws-status" class="pill pill-muted">WS: Connecting</span>
+        <span id="user-badge" class="pill pill-info"></span>
+        <button id="theme-toggle-app" class="btn btn-ghost btn-sm" type="button">Light Mode</button>
+        <button id="logout-btn" class="btn btn-ghost" type="button">Logout</button>
+      </div>
+    </header>
+
+    <nav id="tab-bar" class="tab-bar"></nav>
+
+    <main class="main-content">
+      <!-- ECC Console Tab (Admin) -->
+      <section id="tab-ecc" class="tab-panel hidden">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h2>Create Emergency Alert</h2>
+              <button id="admin-clear-btn" class="btn btn-danger btn-sm" type="button">Clear All Data</button>
+            </div>
+            <div class="preset-group">
+              <div class="preset-header">
+                <span class="field-label">Quick Emergency Presets (1-Click Auto-Fill):</span>
+                <span class="preset-hint">Fills title, priority, protocol, targets &amp; message</span>
+              </div>
+              <div class="preset-grid">
+                <button type="button" class="preset-card preset-fire" data-preset="fire">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill p1">P1 Critical</span>
+                  </div>
+                  <div class="preset-name">Commercial Fire</div>
+                  <div class="preset-meta">TCP • Fire, Police, Amb</div>
+                </button>
+                <button type="button" class="preset-card preset-accident" data-preset="accident">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>
+                        <circle cx="6.5" cy="16.5" r="2.5"/>
+                        <circle cx="16.5" cy="16.5" r="2.5"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill p2">P2 High</span>
+                  </div>
+                  <div class="preset-name">Multi-Car Crash</div>
+                  <div class="preset-meta">TCP • Amb, Police, Hosp</div>
+                </button>
+                <button type="button" class="preset-card preset-medical" data-preset="medical">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill tls">TLS Sensitive</span>
+                  </div>
+                  <div class="preset-name">Trauma / Code Blue</div>
+                  <div class="preset-meta">TLS • Hospital, Police</div>
+                </button>
+                <button type="button" class="preset-card preset-crime" data-preset="crime">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v3m-7.07.07 2.12 2.12M19.07 5.07l-2.12 2.12M10 22h4"/>
+                        <path d="M6 18h12a2 2 0 0 0 2-2V9a8 8 0 0 0-16 0v7a2 2 0 0 0 2 2Z"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill tls">TLS Tactical</span>
+                  </div>
+                  <div class="preset-name">Armed Robbery</div>
+                  <div class="preset-meta">TLS • Police, Hospital</div>
+                </button>
+                <button type="button" class="preset-card preset-disaster" data-preset="disaster">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                        <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                        <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill udp">UDP Broadcast</span>
+                  </div>
+                  <div class="preset-name">Flash Flood</div>
+                  <div class="preset-meta">UDP • Citizen, All</div>
+                </button>
+                <button type="button" class="preset-card preset-general" data-preset="general">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m3 11 18-5v12L3 14v-3z"/>
+                        <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill p3">P3 Normal</span>
+                  </div>
+                  <div class="preset-name">Traffic Advisory</div>
+                  <div class="preset-meta">UDP • Citizen, Police</div>
+                </button>
+              </div>
+            </div>
+            <form id="create-alert-form" class="form-stack">
+              <div class="form-row">
+                <label>
+                  <span>Title</span>
+                  <input id="alert-title" type="text" required minlength="2" maxlength="120" placeholder="e.g. Chemical Spill Sector 62" />
+                </label>
+                <label>
+                  <span>Alert Type</span>
+                  <select id="alert-type">
+                    <option value="accident">Accident</option>
+                    <option value="fire">Fire</option>
+                    <option value="medical">Medical</option>
+                    <option value="crime">Crime</option>
+                    <option value="disaster">Disaster</option>
+                    <option value="tactical">Tactical</option>
+                    <option value="sos">SOS</option>
+                    <option value="general">General</option>
+                  </select>
+                </label>
+              </div>
+              <div class="form-row">
+                <label>
+                  <span>Priority</span>
+                  <select id="alert-priority">
+                    <option value="1">1 — CRITICAL (Preempts Queue)</option>
+                    <option value="2" selected>2 — HIGH</option>
+                    <option value="3">3 — NORMAL</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Transport Protocol</span>
+                  <select id="alert-protocol">
+                    <option value="TCP">TCP (Reliable + ACK/Retry)</option>
+                    <option value="UDP">UDP (Fast Connectionless Broadcast)</option>
+                    <option value="TLS">TLS 1.2+/1.3 (Encrypted)</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                <span>Location</span>
+                <input id="alert-location" type="text" required minlength="2" maxlength="200" placeholder="e.g. JIIT Sector 62 Main Gate" />
+              </label>
+              <label>
+                <span>Message</span>
+                <textarea id="alert-message" rows="2" required minlength="2" maxlength="2000" placeholder="Detailed dispatch instructions..."></textarea>
+              </label>
+              <div class="checkbox-group">
+                <span class="field-label">Target Responders:</span>
+                <label class="inline-check"><input type="checkbox" name="target" value="police" checked /> Police</label>
+                <label class="inline-check"><input type="checkbox" name="target" value="ambulance" /> Ambulance</label>
+                <label class="inline-check"><input type="checkbox" name="target" value="fire" /> Fire</label>
+                <label class="inline-check"><input type="checkbox" name="target" value="hospital" /> Hospital</label>
+                <label class="inline-check"><input type="checkbox" name="target" value="citizen" /> Citizen</label>
+              </div>
+              <label class="inline-check sensitive-box">
+                <input id="alert-sensitive" type="checkbox" />
+                <span>Sensitive (Patient / Tactical Data — enforces TLS to Hospital / Police only)</span>
+              </label>
+              <div id="create-alert-msg" class="info-banner hidden"></div>
+              <button type="submit" class="btn btn-primary">Dispatch Alert</button>
+            </form>
+          </div>
+
+          <div class="card ecc-queue-card">
+            <div class="card-header">
+              <h2>Live Queue &amp; Connected Socket Clients</h2>
+            </div>
+            <h3>Priority Queue (Critical &gt; High &gt; Normal + Aging)</h3>
+            <div id="queue-list" class="mini-list"></div>
+            <h3 class="mt-16">Active Responder Socket Processes</h3>
+            <div id="clients-list" class="mini-list"></div>
+
+            <h3 class="mt-16">Create Responder Account (Admin Only)</h3>
+            <form id="admin-reg-form" class="form-stack">
+              <div class="form-row">
+                <label>
+                  <span>Username (3-30 chars)</span>
+                  <input id="admin-reg-username" type="text" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_]{3,30}" placeholder="e.g. police_unit2" />
+                </label>
+                <label>
+                  <span>Responder Role</span>
+                  <select id="admin-reg-role">
+                    <option value="police">Police</option>
+                    <option value="ambulance">Ambulance</option>
+                    <option value="fire">Fire</option>
+                    <option value="hospital">Hospital</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                <span>Password (min 8 chars)</span>
+                <input id="admin-reg-password" type="password" required minlength="8" maxlength="128" placeholder="At least 8 characters" />
+              </label>
+              <div id="admin-reg-msg" class="info-banner hidden"></div>
+              <button type="submit" class="btn btn-ghost btn-sm">Create Responder Account</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card mt-16">
+          <div class="card-header">
+            <h2>Live Delivery Tracking</h2>
+            <span class="muted">Real socket RTT &amp; emulated link paths</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Title</th>
+                  <th>Prio</th>
+                  <th>Target</th>
+                  <th>Proto</th>
+                  <th>Status</th>
+                  <th>RTT (ms)</th>
+                  <th>Attempts</th>
+                  <th>Route</th>
+                </tr>
+              </thead>
+              <tbody id="ecc-deliveries-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Responder Inbox Tab -->
+      <section id="tab-inbox" class="tab-panel hidden">
+        <div class="card">
+          <div class="card-header">
+            <h2>Responder Inbox (<span id="inbox-role-label"></span>)</h2>
+            <button id="refresh-inbox-btn" class="btn btn-ghost btn-sm" type="button">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Priority</th>
+                  <th>Title &amp; Message</th>
+                  <th>Location</th>
+                  <th>Proto</th>
+                  <th>Status</th>
+                  <th>RTT (ms)</th>
+                  <th>Route</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="inbox-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Citizen SOS Tab -->
+      <section id="tab-citizen" class="tab-panel hidden">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h2>Send Citizen SOS Alert</h2>
+            </div>
+            <div class="preset-group">
+              <div class="preset-header">
+                <span class="field-label">Quick SOS Templates:</span>
+                <span class="preset-hint">Instant fill for critical personal emergencies</span>
+              </div>
+              <div class="preset-grid preset-grid-sos">
+                <button type="button" class="preset-card preset-medical" data-sos-preset="medical">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill p1">SOS P1</span>
+                  </div>
+                  <div class="preset-name">Medical Collapse</div>
+                  <div class="preset-meta">Amb &amp; Police</div>
+                </button>
+                <button type="button" class="preset-card preset-accident" data-sos-preset="accident">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>
+                        <circle cx="6.5" cy="16.5" r="2.5"/>
+                        <circle cx="16.5" cy="16.5" r="2.5"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill p1">SOS P1</span>
+                  </div>
+                  <div class="preset-name">Road Accident</div>
+                  <div class="preset-meta">Police &amp; Amb</div>
+                </button>
+                <button type="button" class="preset-card preset-crime" data-sos-preset="crime">
+                  <div class="preset-top">
+                    <span class="preset-icon">
+                      <svg class="preset-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <line x1="12" x2="12" y1="8" y2="12"/>
+                        <line x1="12" x2="12.01" y1="16" y2="16"/>
+                      </svg>
+                    </span>
+                    <span class="preset-pill p1">SOS P1</span>
+                  </div>
+                  <div class="preset-name">Safety Threat</div>
+                  <div class="preset-meta">Police Intercept</div>
+                </button>
+              </div>
+            </div>
+            <form id="sos-form" class="form-stack">
+              <label>
+                <span>Emergency Title</span>
+                <input id="sos-title" type="text" required minlength="2" maxlength="120" placeholder="e.g. Road Accident Near Metro" />
+              </label>
+              <label>
+                <span>Your Location</span>
+                <input id="sos-location" type="text" required minlength="2" maxlength="200" placeholder="e.g. Sector 62 Crossing" />
+              </label>
+              <label>
+                <span>Details</span>
+                <textarea id="sos-message" rows="3" required minlength="2" maxlength="2000" placeholder="Describe the emergency..."></textarea>
+              </label>
+              <div class="checkbox-group">
+                <span class="field-label">Notify Services:</span>
+                <label class="inline-check"><input type="checkbox" name="sos-target" value="police" checked /> Police</label>
+                <label class="inline-check"><input type="checkbox" name="sos-target" value="ambulance" checked /> Ambulance</label>
+                <label class="inline-check"><input type="checkbox" name="sos-target" value="fire" /> Fire</label>
+              </div>
+              <div id="sos-msg" class="info-banner hidden"></div>
+              <button type="submit" class="btn btn-danger">Send SOS (Critical TCP)</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h2>Citizen Broadcast Alerts Received</h2>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Title</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="citizen-inbox-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Network, Metrics & Routing Tab -->
+      <section id="tab-network" class="tab-panel hidden">
+        <div class="kpi-grid" id="metrics-kpis"></div>
+
+        <div class="grid-2 mt-16">
+          <div class="card">
+            <div class="card-header">
+              <h2>Network Topology (Emulated Link Layer)</h2>
+              <span class="pill pill-warn">Emulated Link Delays &amp; DropTail Queues</span>
+            </div>
+            <canvas id="topology-canvas" width="760" height="390"></canvas>
+            <div class="form-row mt-12">
+              <label>
+                <span>Compare Route Destination</span>
+                <select id="route-dst-select">
+                  <option value="POLICE">POLICE</option>
+                  <option value="FIRE">FIRE</option>
+                  <option value="AMBULANCE">AMBULANCE</option>
+                  <option value="HOSPITAL">HOSPITAL</option>
+                  <option value="TOWER_SOUTH">TOWER_SOUTH (Citizen)</option>
+                </select>
+              </label>
+              <div id="route-compare-box" class="route-box"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Link Controls &amp; Emulated Queue Stats</h2>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Link (Emulated)</th>
+                    <th>Path</th>
+                    <th>Delay / BW / Q</th>
+                    <th>Drops</th>
+                    <th>State</th>
+                  </tr>
+                </thead>
+                <tbody id="links-control-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2 mt-16">
+          <div class="card">
+            <div class="card-header">
+              <h2>Measured RTT (ms) — 1 Hz Real Telemetry</h2>
+            </div>
+            <canvas id="rtt-chart" width="600" height="220"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h2>Throughput (B/s) &amp; Loss Rate (%) — 1 Hz Real Telemetry</h2>
+            </div>
+            <canvas id="tput-chart" width="600" height="220"></canvas>
+          </div>
+        </div>
+
+        <div class="grid-2 mt-16">
+          <div class="card">
+            <div class="card-header">
+              <h2>TCP vs UDP vs TLS Breakdown (Measured)</h2>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Protocol</th>
+                    <th>TX Pkts</th>
+                    <th>ACKed</th>
+                    <th>Timeouts / Gaps</th>
+                    <th>Emulated Drops</th>
+                    <th>ACK Rate</th>
+                    <th>Avg RTT</th>
+                  </tr>
+                </thead>
+                <tbody id="proto-breakdown-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h2>Recent Network Event Logs</h2>
+            </div>
+            <div id="logs-feed" class="logs-feed"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Wireshark Tab -->
+      <section id="tab-wireshark" class="tab-panel hidden">
+        <div class="card">
+          <div class="card-header">
+            <h2>Wireshark Packet Capture &amp; EMRG Dissector</h2>
+            <span class="pill pill-info">Filter: tcp.port==9001 || udp.port==9002 || tcp.port==9003</span>
+          </div>
+          <p class="muted">
+            Capture real loopback traffic on Windows using Wireshark with the <strong>Npcap Loopback Adapter</strong>,
+            load <code>wireshark/emrg.lua</code>, save as <code>.pcap</code> or <code>.pcapng</code>, and upload below.
+          </p>
+          <form id="pcap-upload-form" class="upload-row mt-12">
+            <input id="pcap-file-input" type="file" accept=".pcap,.pcapng,.cap" required />
+            <button type="submit" class="btn btn-primary">Upload &amp; Dissect Capture</button>
+          </form>
+          <div id="pcap-summary" class="kpi-grid mt-12"></div>
+        </div>
+
+        <div class="grid-2 mt-16">
+          <div class="card">
+            <div class="card-header">
+              <h2>Dissected Packets</h2>
+            </div>
+            <div class="table-wrap tall-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Time</th>
+                    <th>Src</th>
+                    <th>Dst</th>
+                    <th>Proto</th>
+                    <th>Len</th>
+                    <th>EMRG Decode</th>
+                  </tr>
+                </thead>
+                <tbody id="pcap-packets-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h2>Packet Detail &amp; Hex Dump</h2>
+            </div>
+            <pre id="pcap-hex-view" class="hex-view">Upload a real .pcap/.pcapng file and click any packet row to inspect EMRG fields and hex bytes.</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- NS-2 Simulation Tab -->
+      <section id="tab-ns2" class="tab-panel hidden">
+        <div class="card">
+          <div class="card-header">
+            <h2>NS-2 Simulation Trace Analyzer (Ubuntu)</h2>
+            <span class="pill pill-info">Same 8-Node Topology • TCP Reno + UDP CBR + rtProtoDV</span>
+          </div>
+          <div id="ns2-wsl-instructions" class="wsl-box">
+            <strong>Run real NS-2 simulations in Ubuntu:</strong>
+            <code>cd ns2 &amp;&amp; bash run_ns2.sh</code>
+            <span>Generates <code>real_trace_low.tr</code>, <code>real_trace_normal.tr</code>, and <code>real_trace_heavy.tr</code>. Upload each below.</span>
+          </div>
+          <form id="ns2-upload-form" class="upload-row mt-12">
+            <select id="ns2-load-select">
+              <option value="low">Low Load</option>
+              <option value="normal">Normal Load</option>
+              <option value="heavy">Heavy Load</option>
+            </select>
+            <input id="ns2-file-input" type="file" accept=".tr,.txt,.nam" required />
+            <button type="submit" class="btn btn-primary">Upload &amp; Parse Trace</button>
+          </form>
+        </div>
+
+        <div class="card mt-16">
+          <div class="card-header">
+            <h2>Low vs Normal vs Heavy Load Comparison</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Load</th>
+                  <th>Sent</th>
+                  <th>Received</th>
+                  <th>Dropped</th>
+                  <th>Loss %</th>
+                  <th>Avg Delay (ms)</th>
+                  <th>Throughput (kbps)</th>
+                  <th>TCP Loss % / Tput</th>
+                  <th>UDP Loss % / Tput</th>
+                </tr>
+              </thead>
+              <tbody id="ns2-compare-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-2 mt-16">
+          <div class="card">
+            <div class="card-header">
+              <h2>Load Comparison Bar Chart (Loss %, Delay, Throughput)</h2>
+            </div>
+            <canvas id="ns2-bar-chart" width="600" height="240"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h2>TCP Reno Congestion Window (cwnd)</h2>
+            </div>
+            <canvas id="ns2-cwnd-chart" width="600" height="240"></canvas>
+          </div>
+        </div>
+
+        <div class="card mt-16">
+  <div class="card-header replay-header">
+    <h2>Trace-Driven Replay Animation</h2>
+
+    <div class="replay-controls">
+      <select id="ns2-replay-load">
+        <option value="low">Low</option>
+        <option value="normal">Normal</option>
+        <option value="heavy">Heavy</option>
+      </select>
+
+      <button id="ns2-play-btn" class="btn btn-primary btn-sm" type="button">Play</button>
+      <button id="ns2-pause-btn" class="btn btn-ghost btn-sm" type="button">Pause</button>
+      <button id="ns2-reset-btn" class="btn btn-ghost btn-sm" type="button">Reset</button>
+    </div>
+
+    <span id="ns2-replay-status" class="muted replay-status">
+      t = 0.000s
+    </span>
+  </div>
+
+  <canvas id="ns2-replay-canvas" width="900" height="360"></canvas>
+</div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/app.js?v=4"></script>
+</body>
+</html>
+
